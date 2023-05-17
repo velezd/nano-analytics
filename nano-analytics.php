@@ -4,12 +4,11 @@ $servername = "localhost";
 $username = "tester";
 $password = "testing";
 $dbname = "nano_analytics";
+$uuid_pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
+$path_pattern = '/.*/i';
 
 if (isset($_GET['uuid'])) {
     // New statistics entry
-    $uuid_pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
-    $path_pattern = '/.*/i';
-
     // Get the data from the GET request
     $data_uuid = $_GET['uuid'];
     $data_path = $_GET['path'];
@@ -55,9 +54,24 @@ if (isset($_GET['uuid'])) {
         ");
         // Execute the SQL statement
         $stmt->execute();
-
         // Fetch the result as an associative array
-        $path_statistics = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $all_statistics = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (isset($_GET['path_stat'])) {
+            $data_path = $_GET['path_stat'];
+            if ( ! preg_match($path_pattern, $data_path)) {
+                exit("Bad path");
+            }
+            $stmt = $conn->prepare("
+                SELECT uuid, date
+                FROM statistics
+                WHERE path = :path
+                ORDER BY date DESC
+            ");
+            $stmt->execute(['path' => $data_path]);
+            $path_statistics = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
     }
@@ -141,17 +155,32 @@ if (isset($_GET['uuid'])) {
         <header><h1>Nano Analytics</h1></header>
         <section class="left">
             <h2>Current statistics</h2>
-            <table>
-                <tr><th>Page</th><th>Views</th></tr>
-<?php
-// Iterate over the results and display the path and UUID count
-foreach ($path_statistics as $stat) {
-    echo "<tr><td>".$stat['path']."</td><td><center>".$stat['uuid_count']."</center></td></tr>";
-}
-?>
+            <table width="90%">
+                <tr><th>Page</th><th>Users</th></tr>
+                <?php
+                // Iterate over the results and display the path and UUID count
+                foreach ($all_statistics as $stat) {
+                    echo "<tr><td>
+                          <a href=\"?path_stat=".urlencode($stat['path'])."\">".$stat['path']."</a></td>
+                          <td><center>".$stat['uuid_count']."</center></td></tr>";
+                }
+                ?>
             </table>
         </section>
         <section class="right">
+            <?php
+            if (isset($path_statistics)) {
+                echo "<h2>Views of ".$data_path."</h2>"
+            ?>
+            <table width="90%">
+                <tr><th>UUID</th><th>Date</th></tr>
+                <?php
+                foreach ($path_statistics as $stat) {
+                    echo "<tr><td>".$stat['uuid']."</td><td><center>".$stat['date']."</center></td></tr>";
+                }
+                ?>
+            </table>
+            <?php } ?>
         </section>
     <body>
 </html>
