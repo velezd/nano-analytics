@@ -31,9 +31,9 @@ if (isset($_GET['uuid'])) {
 
         // Check if the insertion was successful
         if ($stmt->rowCount() > 0) {
-            echo "Data inserted successfully!";
+            exit("OK");
         } else {
-            echo "Error inserting data.";
+            exit("Error inserting data");
         }
     } catch (PDOException $e) {
         exit($e->getMessage());
@@ -57,13 +57,7 @@ if (isset($_GET['uuid'])) {
         $stmt->execute();
 
         // Fetch the result as an associative array
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        // Iterate over the results and display the path and UUID count
-        foreach ($results as $result) {
-            $path = $result['path'];
-            $uuidCount = $result['uuid_count'];
-            echo "Path: $path, UUID Count: $uuidCount" . PHP_EOL;
-        }
+        $path_statistics = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
     }
@@ -72,3 +66,92 @@ if (isset($_GET['uuid'])) {
     $conn = null;
 }
 ?>
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <title>Nano Analytics</title>
+        <style>
+            :root {
+                --body-bg: #fff;
+                --body-text: #000;
+                --header-bg: #000;
+                --header-text: #efefef;
+                --tr-nth-bg: #ededed;
+            }
+            body {
+                padding: 0px;
+                margin: 0px;
+                font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+                font-size: 16px;
+                background-color: var(--body-bg);
+                color: var(--body-text);
+            }
+            header {
+                margin: 0px;
+                background-color: var(--header-bg);
+                color:  var(--header-text);
+            }
+            h1 {
+                font-weight: normal;
+                padding: 10px 20px 5px 15px;
+                margin: 0px;
+                font-size: 25px;
+            }
+            h2 {
+                font-weight: normal;
+                padding: 10px 15px 0px 15px;
+                margin: 0px;
+                font-size: 20px;
+            }
+            table {
+                margin: 7px 15px 7px 15px;
+                border: 1px solid var(--header-bg);
+                border-collapse: collapse;
+            }
+            th {
+                font-weight: normal;
+                padding: 4px 15px 0px 15px;
+                background-color: var(--header-bg);
+                color: var(--header-text);
+            }
+            tr:nth-child(even) {
+                background-color: var(--tr-nth-bg);
+            }
+            td {
+                padding: 4px 5px 0px 5px;
+            }
+            .left {
+                width: 49%;
+                float: left;
+                margin: 0px;
+                padding: 0px;
+                #border: 1px solid red;
+            }
+            .right {
+                width: 49%;
+                float: right;
+                margin: 0px;
+                padding: 0px;
+                #border: 1px solid blue;
+            }
+        </style>
+    </head>
+    <body>
+        <header><h1>Nano Analytics</h1></header>
+        <section class="left">
+            <h2>Current statistics</h2>
+            <table>
+                <tr><th>Page</th><th>Views</th></tr>
+<?php
+// Iterate over the results and display the path and UUID count
+foreach ($path_statistics as $stat) {
+    echo "<tr><td>".$stat['path']."</td><td><center>".$stat['uuid_count']."</center></td></tr>";
+}
+?>
+            </table>
+        </section>
+        <section class="right">
+        </section>
+    <body>
+</html>
