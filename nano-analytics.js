@@ -1,3 +1,10 @@
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 function getUUID() {
     const exdays = 30;
     const cookieName = 'uuid'; // Name of the cookie
@@ -5,7 +12,7 @@ function getUUID() {
     // Check if the cookie is already set
     if (document.cookie.indexOf(cookieName) === -1) {
         // If the cookie is not set, create a new cookie with the UUID
-        let cvalue = crypto.randomUUID(); // Generate a UUID
+        let cvalue = uuidv4(); // Generate a UUID
         const d = new Date();
         d.setTime(d.getTime() + (exdays*24*60*60*1000));
         let expires = "expires="+ d.toUTCString();
