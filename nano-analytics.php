@@ -5,7 +5,7 @@ $username = "tester";
 $password = "testing";
 $dbname = "nano_analytics";
 $uuid_pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
-$path_pattern = '^(\/[a-z0-9\-_+~\.\%]+)+(.[a-z]{3,4})?$/i';
+$path_pattern = '/^(\/[a-z0-9\-_+~\.\%]+)+(.[a-z]{3,4})?$/i';
 
 if (isset($_GET['uuid'])) {
     // New statistics entry
